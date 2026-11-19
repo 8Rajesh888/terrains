@@ -7,10 +7,10 @@ function running() {
 function setup() {
     const screenWidth = 400;
     const screenHeight = 400;
-    const FPS = 20;
+    const FPS = 50;
     const world = {};
 
-    r.SetTraceLogLevel(r.LOG_DEBUG);
+    r.SetTraceLogLevel(r.LOG_NONE);
     r.InitWindow(screenWidth, screenHeight, "Rectangle");
     r.SetTargetFPS(FPS);
 
@@ -25,11 +25,7 @@ function draw() {
 
     r.BeginDrawing();
     r.ClearBackground(r.BLACK);
-
-
-
     r.EndDrawing();
-
 
 }
 
