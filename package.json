@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "noisejs": "^2.1.0",
     "raylib": "^0.14.0"
   }
 }

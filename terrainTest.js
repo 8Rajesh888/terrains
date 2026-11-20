@@ -1,8 +1,20 @@
-const grassImg = `🟩`;
-const houseImg = `🛖`;
-const waterImg = `🟦`;
-const mudImg = `🟫`;
-const cells = 10;
+const { Noise } = require("noisejs");
+const grass = `🟩`;
+const house = `🛖`;
+const water = `🟦`;
+const mud = `🟫`;
+const tree = `🌲`;
+const cells = 26;
+
+function cloneTerrain(terrain) {
+    const clone = [];
+    for (const row of terrain) {
+        clone.push([...row]);
+    }
+    return clone;
+}
+
+
 
 const pick = function (...values) {
     const index = Math.floor(Math.random() * values.length);
@@ -22,11 +34,8 @@ const hasSurrounding = function (t, img, r, c) {
     return false;
 }
 
-const placeRiver = function (terrain, cells, waterImg) {
-    const t = [];
-    for (const row of terrain) {
-        t.push([...row]);
-    }
+const placeRiver = function (terrain, cells, water) {
+    const t = cloneTerrain(terrain);
 
     const dim = Math.floor(cells / 3)
     const X = pick(0, cells - 1);
@@ -41,7 +50,7 @@ const placeRiver = function (terrain, cells, waterImg) {
         const r = Y + (rowOffset * stepY);
         for (let colOffset = 0; colOffset < width; colOffset++) {
             const c = X + (colOffset * stepX);
-            t[r][c] = waterImg;
+            t[r][c] = water;
         }
         width = Math.max(1, width - Math.floor(Math.random() * 2));
     }
@@ -49,26 +58,37 @@ const placeRiver = function (terrain, cells, waterImg) {
     return t;
 }
 
-const placeMud = function (terrain, cells, waterImg, mudImg, grassImg) {
-    const t = [];
-    for (const row of terrain) {
-        t.push([...row]);
-    }
+const placeMud = function (terrain, cells, water, mud) {
+    const t = cloneTerrain(terrain);
 
     for (let row = 0; row < cells; row++) {
         for (let col = 0; col < cells; col++) {
-            if (hasSurrounding(t, waterImg, row, col) && t[row][col] !== waterImg) {
-                t[row][col] = mudImg;
+            if (hasSurrounding(t, water, row, col) && t[row][col] !== water) {
+                t[row][col] = mud;
             }
         }
     }
     return t;
 }
 
-const create = function (num, grassImg) {
+const placeTrees = function (terrain, cells, house, grass, tree) {
+    const t = cloneTerrain(terrain);
+
+    for (let row = 0; row < cells; row++) {
+        for (let col = 0; col < cells; col++) {
+            const canPlace = Math.floor(Math.random() * 20) < 6;
+            if (!hasSurrounding(t, house, row, col) && t[row][col] === grass && canPlace) {
+                t[row][col] = tree;
+            }
+        }
+    }
+    return t;
+}
+
+const create = function (num, grass) {
     const arr = [];
     for (let index = 0; index < num; index++) {
-        arr.push(Array(num).fill(grassImg))
+        arr.push(Array(num).fill(grass))
     }
     return arr;
 }
@@ -87,43 +107,109 @@ const getRandomXY = function (cells) {
     return { x: getRandom(cells), y: getRandom(cells) };
 }
 
-const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grassImg) {
+const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
     for (let r = startRow - 1; r <= startRow + 2; r++) {
         for (let c = startCol - 1; c <= startCol + 2; c++) {
             if (r < 0 || r >= cells || c < 0 || c >= cells) return false;
-            if (t[r][c] === `🛖` || !(t[r][c] === grassImg)) return false;
+            if (!(t[r][c] === grass)) return false;
         }
     }
     return true;
 }
 
-const house = function (terrain, cells, houseImg, grassImg) {
-    const t = [];
-    for (const row of terrain) {
-        t.push([...row]);
-    }
+const placeHouses = function (terrain, cells, house, grass) {
+    const t = cloneTerrain(terrain);
 
-    const noOfHouse = Math.floor(1 + Math.random() * 3);
+    const dim = Math.floor(cells / 3)
+    const noOfHouse = Math.floor(1 + Math.random() * dim);
     let attempts = 0;
     for (let index = 0; index < noOfHouse; index++) {
         let cord = getRandomXY(cells);
-        while (!canPlaceHouse(t, cells, cord, grassImg) && attempts++ < 15) {
+        attempts = 0;
+        while (!canPlaceHouse(t, cells, cord, grass) && attempts++ < 15) {
             cord = getRandomXY(cells);
         }
-        if (attempts === 15) continue;
-        attempts = 0;
+        if (attempts === 16) continue;
         const { x, y } = cord;
-        t[y][x] = houseImg;
-        t[y + 1][x] = houseImg;
-        t[y][x + 1] = houseImg;
-        t[y + 1][x + 1] = houseImg;
+        t[y][x] = house;
+        t[y + 1][x] = house;
+        t[y][x + 1] = house;
+        t[y + 1][x + 1] = house;
     }
     return t;
 }
 
-let terrain = create(cells, grassImg);
-terrain = placeRiver(terrain, cells, waterImg)
-terrain = placeMud(terrain, cells, waterImg, mudImg, grassImg)
-terrain = house(terrain, cells, houseImg, grassImg)
+// const addRiver = function (terrain, water) {
+//     const noise = new Noise(Math.random());
+//     const map = structuredClone(terrain);
+//     // const centerX = Math.floor(Math.random() * map[0].length)
+//     // const centerY = Math.floor(Math.random() * map.length)
+//     const { x: centerX, y: centerY } = getRandomXY(terrain.length);
+//     console.log({ centerX, centerY });
+
+//     for (let i = 0; i < 20; i++) {
+//         const point = noise.perlin2(i * 0.1, 10);
+//         const actucalPoint = Math.floor(point * 10 + 1);
+//         const degree = (360 / 20) * i;
+//         const x = Math.floor(centerX + Math.sin(degree * Math.PI / 180) * actucalPoint);
+//         const y = Math.floor(centerY + Math.cos(degree * Math.PI / 180) * actucalPoint);
+
+//         // console.log(x,
+//         //  y)
+//         if (map[y] === undefined || map[y][x] === undefined) continue
+//         map[y][x] = water;
+//     }
+
+//     // for (const row of map) {
+//     // console.log(...row);
+//     // }
+//     return map;
+// }
+
+
+const addRiver = function (terrain, water) {
+    const noise = new Noise(Math.random());
+    const map = structuredClone(terrain);
+
+    const { x: centerX, y: centerY } = getRandomXY(terrain.length);
+    const baseRadius = 5;
+
+    for (let y = 0; y < map.length; y++) {
+        for (let x = 0; x < map[0].length; x++) {
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+
+            const noiseVal = noise.perlin2(Math.cos(angle), Math.sin(angle));
+            const maxRadius = baseRadius + noiseVal * 3;
+
+            console.log(map[y][x]);
+            if (distance <= maxRadius) {
+                map[y][x] = water;
+
+            }
+        }
+    }
+
+    return map;
+};
+
+
+
+
+const createTerrain = function (cells, water, mud, grass, house) {
+    let t = create(cells, grass);
+    // t = placeRiver(t, cells, water);
+    t = addRiver(t, water);
+    t = placeMud(t, cells, water, mud);
+    t = placeHouses(t, cells, house, grass);
+    t = placeTrees(t, cells, house, grass, tree);
+    return t
+}
+
+const terrain = createTerrain(cells, water, mud, grass, house);
 
 draw(terrain);
+
+
