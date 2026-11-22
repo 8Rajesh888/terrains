@@ -18,8 +18,8 @@ const hasSurrounding = function (t, img, r, c) {
 const placeMud = function (terrain, cells, water, mud) {
     const t = cloneTerrain(terrain);
 
-    for (let row = 0; row < cells; row++) {
-        for (let col = 0; col < cells; col++) {
+    for (let row = 0; row < cells.rows; row++) {
+        for (let col = 0; col < cells.cols; col++) {
             if (hasSurrounding(t, water, row, col) && t[row][col] !== water) {
                 t[row][col] = mud;
             }
@@ -31,8 +31,8 @@ const placeMud = function (terrain, cells, water, mud) {
 const placeTrees = function (terrain, cells, house, grass, tree) {
     const t = cloneTerrain(terrain);
 
-    for (let row = 0; row < cells; row++) {
-        for (let col = 0; col < cells; col++) {
+    for (let row = 0; row < cells.rows; row++) {
+        for (let col = 0; col < cells.cols; col++) {
             const canPlace = Math.floor(Math.random() * 20) < 6;
             if (!hasSurrounding(t, house, row, col) && t[row][col] === grass && canPlace) {
                 t[row][col] = tree;
@@ -42,10 +42,10 @@ const placeTrees = function (terrain, cells, house, grass, tree) {
     return t;
 }
 
-const createBase = function (num, grass) {
+const createBase = function (cells, grass) {
     const arr = [];
-    for (let index = 0; index < num; index++) {
-        arr.push(Array(num).fill(grass))
+    for (let index = 0; index < cells.rows; index++) {
+        arr.push(Array(cells.cols).fill(grass))
     }
     return arr;
 }
@@ -53,11 +53,11 @@ const createBase = function (num, grass) {
 const draw = function (cells, terrain) {
     const screenWidth = r.GetScreenWidth();
     const screenHeight = r.GetScreenHeight();
-    const width = screenWidth / cells;
-    const height = screenHeight / cells;
-    for (let y = 0; y < cells; y++) {
-        for (let x = 0; x < cells; x++) {
-            r.DrawRectangle(x * width, y * width, width, height, terrain[y][x])
+    const width = screenWidth / cells.cols;
+    const height = screenHeight / cells.rows;
+    for (let y = 0; y < cells.rows; y++) {
+        for (let x = 0; x < cells.cols; x++) {
+            r.DrawRectangle(x * width, y * height, width, height, terrain[y][x])
         }
     }
 }
@@ -65,7 +65,7 @@ const draw = function (cells, terrain) {
 const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
     for (let r = startRow - 1; r <= startRow + 2; r++) {
         for (let c = startCol - 1; c <= startCol + 2; c++) {
-            if (r < 0 || r >= cells || c < 0 || c >= cells) return false;
+            if (r < 0 || r >= cells.rows || c < 0 || c >= cells) return false;
             if (!(t[r][c] === grass)) return false;
         }
     }
@@ -75,7 +75,7 @@ const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
 const placeHouses = function (terrain, cells, house, grass) {
     const t = cloneTerrain(terrain);
 
-    const dim = Math.floor(cells / 3)
+    const dim = Math.floor(cells.rows / 3)
     const noOfHouse = Math.floor(1 + Math.random() * dim);
     let attempts = 0;
     for (let index = 0; index < noOfHouse; index++) {
@@ -94,11 +94,11 @@ const placeHouses = function (terrain, cells, house, grass) {
     return t;
 }
 
-const addRiver = function (terrain, water) {
+const addRiver = function (terrain, cells, water) {
     const noise = new Noise(Math.random());
     const map = cloneTerrain(terrain);
 
-    const { x: centerX, y: centerY } = getRandomXY(terrain.length);
+    const { x: centerX, y: centerY } = getRandomXY(cells);
     const baseRadius = 5;
 
     for (let y = 0; y < map.length; y++) {
@@ -124,7 +124,7 @@ const addRiver = function (terrain, water) {
 const create = function (cells, palatte) {
     const { grass, house, water, mud, tree } = palatte;
     let t = createBase(cells, grass);
-    t = addRiver(t, water);
+    t = addRiver(t, cells, water);
     t = placeMud(t, cells, water, mud);
     t = placeHouses(t, cells, house, grass);
     t = placeTrees(t, cells, house, grass, tree);
