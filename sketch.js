@@ -1,30 +1,33 @@
 const r = require("raylib");
+const config = require("./config");
+const nature = require("./nature");
 
 function running() {
     return !r.WindowShouldClose();
 }
 
 function setup() {
-    const screenWidth = 400;
-    const screenHeight = 400;
-    const FPS = 50;
-    const world = {};
+    const { window, palatte, cells } = config.data;
+    const { width, height, title, FPS } = window;
 
     r.SetTraceLogLevel(r.LOG_NONE);
-    r.InitWindow(screenWidth, screenHeight, "Rectangle");
+    r.InitWindow(width, height, title);
     r.SetTargetFPS(FPS);
 
-    return world;
+    const terrain = nature.create(cells, palatte);
+
+    return { terrain, cells };
 }
 
 function update() {
 
 }
 
-function draw() {
-
+function draw(world) {
+    const { terrain, cells } = world;
     r.BeginDrawing();
     r.ClearBackground(r.BLACK);
+    nature.draw(cells, terrain);
     r.EndDrawing();
 
 }
