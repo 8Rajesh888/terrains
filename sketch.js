@@ -1,6 +1,7 @@
 const r = require("raylib");
 const config = require("./config");
 const nature = require("./nature");
+const texture = require("./textures");
 
 function running() {
     return !r.WindowShouldClose();
@@ -15,8 +16,9 @@ function setup() {
     r.SetTargetFPS(FPS);
 
     const terrain = nature.create(cells, palatte);
+    const textures = texture.loadTextures()
 
-    return { terrain, cells };
+    return { terrain, cells, textures };
 }
 
 function update() {
@@ -24,10 +26,10 @@ function update() {
 }
 
 function draw(world) {
-    const { terrain, cells } = world;
+    const { terrain, cells, textures } = world;
     r.BeginDrawing();
     r.ClearBackground(r.BLACK);
-    nature.draw(cells, terrain);
+    nature.draw(cells, terrain, textures);
     r.EndDrawing();
 
 }

@@ -2,6 +2,11 @@ const { Noise } = require("noisejs");
 const r = require("raylib");
 const { cloneTerrain, getRandomXY } = require("./support");
 
+
+const drawTexture = function (textures, object, position) {
+    r.DrawTexturePro(textures.texture, textures[object], position, { x: 0, y: 0 }, 0.0, r.WHITE);
+}
+
 const hasSurrounding = function (t, img, r, c) {
     const positions = [
         [r - 1, c - 1], [r - 1, c], [r - 1, c + 1],
@@ -50,14 +55,17 @@ const createBase = function (cells, grass) {
     return arr;
 }
 
-const draw = function (cells, terrain) {
+const draw = function (cells, terrain, textures) {
     const screenWidth = r.GetScreenWidth();
     const screenHeight = r.GetScreenHeight();
     const width = screenWidth / cells.cols;
     const height = screenHeight / cells.rows;
     for (let y = 0; y < cells.rows; y++) {
         for (let x = 0; x < cells.cols; x++) {
-            r.DrawRectangle(x * width, y * height, width, height, terrain[y][x]);
+            const position = { x: x * width, y: y * height, width, height };
+
+            drawTexture(textures, "grass", position);
+            // r.DrawRectangle(x * width, y * height, width, height, terrain[y][x]);
         }
     }
 }
@@ -124,11 +132,13 @@ const addRiver = function (terrain, cells, water) {
 const create = function (cells, palatte) {
     const { grass, house, water, mud, tree } = palatte;
     let t = createBase(cells, grass);
-    t = addRiver(t, cells, water);
-    t = placeMud(t, cells, water, mud);
-    t = placeHouses(t, cells, house, grass);
-    t = placeTrees(t, cells, house, grass, tree);
+    // t = addRiver(t, cells, water);
+    // t = placeMud(t, cells, water, mud);
+    // t = placeHouses(t, cells, house, grass);
+    // t = placeTrees(t, cells, house, grass, tree);
     return t;
 }
 
 module.exports = { create, draw };
+
+
