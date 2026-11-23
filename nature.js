@@ -63,9 +63,12 @@ const draw = function (cells, terrain, textures) {
     for (let y = 0; y < cells.rows; y++) {
         for (let x = 0; x < cells.cols; x++) {
             const position = { x: x * width, y: y * height, width, height };
-
-            drawTexture(textures, "grass", position);
-            // r.DrawRectangle(x * width, y * height, width, height, terrain[y][x]);
+            const cell = terrain[y][x];
+            switch (cell) {
+                case "grass":
+                    drawTexture(textures, "grass", position);
+                    break;
+            }
         }
     }
 }
