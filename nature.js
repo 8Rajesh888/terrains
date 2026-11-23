@@ -66,7 +66,19 @@ const draw = function (cells, terrain, textures) {
             const cell = terrain[y][x];
             switch (cell) {
                 case "grass":
-                    drawTexture(textures, "grass", position);
+                    drawTexture(textures, cell, position);
+                    break;
+                case "house":
+                    drawTexture(textures, cell, position);
+                    break;
+                case "water":
+                    drawTexture(textures, cell, position);
+                    break;
+                case "mud":
+                    drawTexture(textures, cell, position);
+                    break;
+                case "tree":
+                    drawTexture(textures, cell, position);
                     break;
             }
         }
@@ -135,10 +147,10 @@ const addRiver = function (terrain, cells, water) {
 const create = function (cells, palatte) {
     const { grass, house, water, mud, tree } = palatte;
     let t = createBase(cells, grass);
-    // t = addRiver(t, cells, water);
-    // t = placeMud(t, cells, water, mud);
-    // t = placeHouses(t, cells, house, grass);
-    // t = placeTrees(t, cells, house, grass, tree);
+    t = addRiver(t, cells, water);
+    t = placeMud(t, cells, water, mud);
+    t = placeHouses(t, cells, house, grass);
+    t = placeTrees(t, cells, house, grass, tree);
     return t;
 }
 

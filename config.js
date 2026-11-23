@@ -1,9 +1,9 @@
 const r = require("raylib");
-const ROWS = 10;
-const COLUMNS = 10;
+const ROWS = 105;
+const COLUMNS = 150;
 
-const TILE_WIDTH = 100;
-const TILE_HEIGHT = 100;
+const TILE_WIDTH = 10;
+const TILE_HEIGHT = 10;
 
 const window = {
     height: ROWS * TILE_WIDTH,
