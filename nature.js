@@ -57,7 +57,7 @@ const draw = function (cells, terrain) {
     const height = screenHeight / cells.rows;
     for (let y = 0; y < cells.rows; y++) {
         for (let x = 0; x < cells.cols; x++) {
-            r.DrawRectangle(x * width, y * height, width, height, terrain[y][x])
+            r.DrawRectangle(x * width, y * height, width, height, terrain[y][x]);
         }
     }
 }
@@ -65,7 +65,7 @@ const draw = function (cells, terrain) {
 const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
     for (let r = startRow - 1; r <= startRow + 2; r++) {
         for (let c = startCol - 1; c <= startCol + 2; c++) {
-            if (r < 0 || r >= cells.rows || c < 0 || c >= cells) return false;
+            if (r < 0 || r >= cells.rows || c < 0 || c >= cells.cols) return false;
             if (!(t[r][c] === grass)) return false;
         }
     }
@@ -75,7 +75,7 @@ const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
 const placeHouses = function (terrain, cells, house, grass) {
     const t = cloneTerrain(terrain);
 
-    const dim = Math.floor(cells.rows / 3)
+    const dim = Math.floor(Math.max(cells.rows / 3, cells.cols / 3));
     const noOfHouse = Math.floor(1 + Math.random() * dim);
     let attempts = 0;
     for (let index = 0; index < noOfHouse; index++) {
