@@ -14,8 +14,8 @@ const getRandom = function (cells) {
     return Math.floor(Math.random() * (cells - 3));
 }
 
-const getRandomXY = function (cells) {
-    return { x: getRandom(cells.cols), y: getRandom(cells.rows) };
+const getRandomXY = function (size) {
+    return { x: getRandom(size), y: getRandom(size) };
 }
 
 module.exports = {

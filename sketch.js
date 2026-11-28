@@ -8,14 +8,14 @@ function running() {
 }
 
 function setup() {
-    const { window, palatte, cells } = config.data;
+    const { window, palatte, cells, size } = config.data;
     const { width, height, title, FPS } = window;
 
     r.SetTraceLogLevel(r.LOG_NONE);
     r.InitWindow(width, height, title);
     r.SetTargetFPS(FPS);
 
-    const terrain = nature.create(cells, palatte);
+    const terrain = nature.create(cells, palatte, size);
     const textures = texture.loadTextures()
 
     return { terrain, cells, textures };

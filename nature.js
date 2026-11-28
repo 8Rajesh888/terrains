@@ -47,10 +47,10 @@ const placeTrees = function (terrain, cells, house, grass, tree) {
     return t;
 }
 
-const createBase = function (cells, grass) {
+const createBase = function (cells, grass, size) {
     const arr = [];
-    for (let index = 0; index < cells.rows; index++) {
-        arr.push(Array(cells.cols).fill(grass))
+    for (let index = 0; index < size; index++) {
+        arr.push(Array(size).fill(grass))
     }
     return arr;
 }
@@ -103,17 +103,17 @@ const canPlaceHouse = function (t, cells, { y: startRow, x: startCol }, grass) {
     return true;
 }
 
-const placeHouses = function (terrain, cells, house, grass) {
+const placeHouses = function (terrain, cells, house, grass, size) {
     const t = cloneTerrain(terrain);
 
     const dim = Math.floor(Math.max(cells.rows / 3, cells.cols / 3));
     const noOfHouse = Math.floor(1 + Math.random() * dim);
     let attempts = 0;
     for (let index = 0; index < noOfHouse; index++) {
-        let cord = getRandomXY(cells);
+        let cord = getRandomXY(size);
         attempts = 0;
         while (!canPlaceHouse(t, cells, cord, grass) && attempts++ < 15) {
-            cord = getRandomXY(cells);
+            cord = getRandomXY(size);
         }
         if (attempts === 16) continue;
         const { x, y } = cord;
@@ -140,7 +140,7 @@ const placeHouses = function (terrain, cells, house, grass) {
     return t;
 }
 
-const addPonds = function (terrain, cells, water) {
+const addPonds = function (terrain, cells, water, size) {
     const map = cloneTerrain(terrain);
     const dim = Math.floor(Math.max(cells.rows / 3, cells.cols / 3) / 5);
     const noOfRivers = Math.floor(1 + Math.random() * dim);
@@ -148,7 +148,7 @@ const addPonds = function (terrain, cells, water) {
     for (let index = 0; index < noOfRivers; index++) {
         const noise = new Noise(Math.random());
         const baseRadius = 2 + (Math.random() * 10);
-        const { x: centerX, y: centerY } = getRandomXY(cells);
+        const { x: centerX, y: centerY } = getRandomXY(size);
         for (let y = 0; y < map.length; y++) {
             for (let x = 0; x < map[0].length; x++) {
                 const dx = x - centerX;
@@ -170,13 +170,13 @@ const addPonds = function (terrain, cells, water) {
     return map;
 };
 
-const create = function (cells, palatte) {
+const create = function (cells, palatte, size) {
     const { grass, house, water, mud, tree } = palatte;
-    let t = createBase(cells, grass);
-    t = addPonds(t, cells, water);
-    t = placeMud(t, cells, water, mud);
-    t = placeHouses(t, cells, house, grass);
-    t = placeTrees(t, cells, house, grass, tree);
+    let t = createBase(cells, grass, size);
+    t = addPonds(t, cells, water, size);
+    t = placeMud(t, cells, water, mud, size);
+    t = placeHouses(t, cells, house, grass, size);
+    t = placeTrees(t, cells, house, grass, tree, size);
     return t;
 }
 
