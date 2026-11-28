@@ -11,7 +11,7 @@ const pick = function (...values) {
     return values[index]
 }
 const getRandom = function (cells) {
-    return Math.floor(Math.random() * (cells - 1));
+    return Math.floor(Math.random() * (cells - 3));
 }
 
 const getRandomXY = function (cells) {

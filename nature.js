@@ -38,8 +38,8 @@ const placeTrees = function (terrain, cells, house, grass, tree) {
 
     for (let row = 0; row < cells.rows; row++) {
         for (let col = 0; col < cells.cols; col++) {
-            const canPlace = Math.floor(Math.random() * 20) < 6;
-            if (!hasSurrounding(t, house, row, col) && t[row][col] === grass && canPlace) {
+            const canPlace = Math.floor(Math.random() * 60) < 6;
+            if (!hasSurrounding(t, house, row, col) && !hasSurrounding(t, "continue", row, col) && t[row][col] === grass && canPlace) {
                 t[row][col] = tree;
             }
         }
@@ -62,14 +62,18 @@ const draw = function (cells, terrain, textures) {
     const height = screenHeight / cells.rows;
     for (let y = 0; y < cells.rows; y++) {
         for (let x = 0; x < cells.cols; x++) {
-            const position = { x: x * width, y: y * height, width, height };
             const cell = terrain[y][x];
+            const position = { x: x * width, y: y * height, width, height };
             switch (cell) {
                 case "grass":
                     drawTexture(textures, cell, position);
                     break;
                 case "house":
-                    drawTexture(textures, cell, position);
+                    drawTexture(textures, "grass", position);
+                    const w = width * 4;
+                    const h = height * 4;
+                    const position2 = { x: x * width, y: y * height, width: w, height: h };
+                    drawTexture(textures, cell, position2);
                     break;
                 case "water":
                     drawTexture(textures, cell, position);
@@ -78,7 +82,11 @@ const draw = function (cells, terrain, textures) {
                     drawTexture(textures, cell, position);
                     break;
                 case "tree":
-                    drawTexture(textures, cell, position);
+                    drawTexture(textures, "grass", position);
+                    const w2 = width * 2;
+                    const h2 = height * 3;
+                    const position3 = { x: x * width - 8, y: y * height - 16, width: w2, height: h2 };
+                    drawTexture(textures, cell, position3);
                     break;
             }
         }
@@ -110,33 +118,51 @@ const placeHouses = function (terrain, cells, house, grass) {
         if (attempts === 16) continue;
         const { x, y } = cord;
         t[y][x] = house;
-        t[y + 1][x] = house;
-        t[y][x + 1] = house;
-        t[y + 1][x + 1] = house;
+        t[y][x + 1] = "continue";
+        t[y][x + 2] = "continue";
+        t[y][x + 3] = "continue";
+
+        t[y + 1][x] = "continue";
+        t[y + 1][x + 1] = "continue";
+        t[y + 1][x + 2] = "continue";
+        t[y + 1][x + 3] = "continue";
+
+        t[y + 2][x] = "continue";
+        t[y + 2][x + 1] = "continue";
+        t[y + 2][x + 2] = "continue";
+        t[y + 2][x + 3] = "continue";
+
+        t[y + 3][x] = "continue";
+        t[y + 3][x + 1] = "continue";
+        t[y + 3][x + 2] = "continue";
+        t[y + 3][x + 3] = "continue";
     }
     return t;
 }
 
-const addRiver = function (terrain, cells, water) {
-    const noise = new Noise(Math.random());
+const addPonds = function (terrain, cells, water) {
     const map = cloneTerrain(terrain);
+    const dim = Math.floor(Math.max(cells.rows / 3, cells.cols / 3) / 5);
+    const noOfRivers = Math.floor(1 + Math.random() * dim);
 
-    const { x: centerX, y: centerY } = getRandomXY(cells);
-    const baseRadius = 5;
+    for (let index = 0; index < noOfRivers; index++) {
+        const noise = new Noise(Math.random());
+        const baseRadius = 2 + (Math.random() * 10);
+        const { x: centerX, y: centerY } = getRandomXY(cells);
+        for (let y = 0; y < map.length; y++) {
+            for (let x = 0; x < map[0].length; x++) {
+                const dx = x - centerX;
+                const dy = y - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
 
-    for (let y = 0; y < map.length; y++) {
-        for (let x = 0; x < map[0].length; x++) {
-            const dx = x - centerX;
-            const dy = y - centerY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx);
+                const noiseVal = noise.perlin2(Math.cos(angle), Math.sin(angle));
+                const maxRadius = baseRadius + noiseVal * 3;
 
-            const noiseVal = noise.perlin2(Math.cos(angle), Math.sin(angle));
-            const maxRadius = baseRadius + noiseVal * 3;
+                if (distance <= maxRadius) {
+                    map[y][x] = water;
 
-            if (distance <= maxRadius) {
-                map[y][x] = water;
-
+                }
             }
         }
     }
@@ -147,7 +173,7 @@ const addRiver = function (terrain, cells, water) {
 const create = function (cells, palatte) {
     const { grass, house, water, mud, tree } = palatte;
     let t = createBase(cells, grass);
-    t = addRiver(t, cells, water);
+    t = addPonds(t, cells, water);
     t = placeMud(t, cells, water, mud);
     t = placeHouses(t, cells, house, grass);
     t = placeTrees(t, cells, house, grass, tree);
@@ -155,5 +181,3 @@ const create = function (cells, palatte) {
 }
 
 module.exports = { create, draw };
-
-
